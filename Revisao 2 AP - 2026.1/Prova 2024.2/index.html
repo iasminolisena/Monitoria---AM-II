@@ -2,24 +2,77 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  
   <title>Gerenciador de Leituras</title>
 </head>
 <body>
-  <h1>Gerenciador de Leituras</h1>
+  <header>
+  <h1>📚 Gerenciador de Leituras</h1>
+  <p>Registre e acompanhe seus livros, artigos e materiais</p>
+</header>
 
-  <label>Título:  <input type="text" id="inTitulo" placeholder="Digite o título"></label>
-  <label>Autor:   <input type="text" id="inAutor"  placeholder="Nome do autor"></label>
-  <label>Data:    <input type="date" id="inData"></label>
-  <label>Status:
-    <select id="inStatus">
-      <option value="Em andamento">Em andamento</option>
-      <option value="Concluída">Concluída</option>
-    </select>
-  </label>
-  <button id="btnAdicionar">Adicionar Leitura</button>
+<main>
+  <div class="panel" id="form-card">
+    <h2 class="panel__title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nova Leitura
+    </h2>
 
-  <h2>Leituras Registradas</h2>
-  <ul id="listaLeituras"></ul>
+    <form id="form-leitura" novalidate>
+      <div class="form-grid">
+        <div class="field">
+          <label for="titulo">Título</label>
+          <input id="titulo" type="text" placeholder="Nome do livro ou artigo" />
+        </div>
+
+        <div class="field">
+          <label for="autor">Autor</label>
+          <input id="autor" type="text" placeholder="Nome do autor" />
+        </div>
+
+        <div class="field">
+          <label for="dataInicio">Data de Início</label>
+          <input id="dataInicio" type="date" />
+        </div>
+
+        <div class="field">
+          <label for="status">Status</label>
+          <div class="select-wrap">
+            <select id="status">
+              <option value="Em andamento">Em andamento</option>
+              <option value="Concluída">Concluída</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn--primary" id="btn-adicionar" type="submit">
+        Adicionar Leitura
+      </button>
+    </form>
+  </div>
+
+  <!-- Lista de leituras -->
+  <div class="panel">
+    <div class="lista-header">
+      <h2 class="panel__title" style="margin:0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Leituras Registradas
+      </h2>
+      <span id="contador">0 registros</span>
+    </div>
+
+    <div id="empty-state" style="display:flex">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <p>Nenhuma leitura cadastrada ainda.<br/>Adicione a primeira acima!</p>
+    </div>
+
+    <ul id="lista-leituras"></ul>
+  </div>
+
+</main>
+
+<div id="toast-container"></div>
 
   <!-- type="module" é OBRIGATÓRIO para usar import/export -->
   <script type="module" src="modulo/app.js"></script>
