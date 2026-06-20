@@ -4,10 +4,10 @@ import { renderizar }                   from './dom.js';
 const btn = document.getElementById('btnAdicionar');
 
 btn.addEventListener('click', () => {
-  const titulo = document.getElementById('inTitulo').value.trim();
-  const autor  = document.getElementById('inAutor').value.trim();
-  const data   = document.getElementById('inData').value;
-  const status = document.getElementById('inStatus').value;
+  const titulo = document.getElementById('titulo').value.trim();
+  const autor  = document.getElementById('autor').value.trim();
+  const data   = document.getElementById('data').value;
+  const status = document.getElementById('status').value;
 
   if (!titulo || !autor) { alert('Preencha ao menos título e autor!'); return; }
 
