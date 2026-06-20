@@ -6,7 +6,7 @@ const btn = document.getElementById('btnAdicionar');
 btn.addEventListener('click', () => {
   const titulo = document.getElementById('titulo').value.trim();
   const autor  = document.getElementById('autor').value.trim();
-  const data   = document.getElementById('data').value;
+  const data   = document.getElementById('dataInicio').value;
   const status = document.getElementById('status').value;
 
   if (!titulo || !autor) { alert('Preencha ao menos título e autor!'); return; }
@@ -16,9 +16,9 @@ btn.addEventListener('click', () => {
   salvarLeituras(lista);
 
   // Limpa os campos após adicionar
-  document.getElementById('inTitulo').value = '';
-  document.getElementById('inAutor').value  = '';
-  document.getElementById('inData').value   = '';
+  document.getElementById('titulo').value = '';
+  document.getElementById('autor').value  = '';
+  document.getElementById('dataInicio').value   = '';
 
   renderizar();
 });
