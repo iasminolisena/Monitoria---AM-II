@@ -1,50 +1,89 @@
 import { obterLeituras, salvarLeituras } from './storage.js';
 
 export function renderizar() {
-  const ul = document.getElementById('listaLeituras');
-  ul.innerHTML = '';  // limpa antes de redesenhar
+  const lista = obterLeituras();
 
-  obterLeituras().forEach((leitura, index) => {
-    const li         = document.createElement('li');
-    const btnEditar  = document.createElement('button');
-    const btnRemover = document.createElement('button');
+  const ul = document.getElementById('lista-leituras');
+  const contador = document.getElementById('contador');
+  const emptyState = document.getElementById('empty-state');
+
+  ul.innerHTML = '';
+
+  contador.textContent =
+    `${lista.length} ${lista.length === 1 ? 'registro' : 'registros'}`;
+
+  emptyState.style.display =
+    lista.length === 0 ? 'flex' : 'none';
+
+  lista.forEach((leitura, index) => {
+    const li = document.createElement('li');
+    li.classList.add('card-leitura');
 
     li.innerHTML = `
-      <strong>${leitura.titulo}</strong><br>
-      Autor: ${leitura.autor}<br>
-      Data de Início: ${leitura.data}<br>
-      Status: ${leitura.status}
+      <div class="card-conteudo">
+        <h3>${leitura.titulo}</h3>
+        <p><strong>Autor:</strong> ${leitura.autor}</p>
+        <p><strong>Data de Início:</strong> ${leitura.data}</p>
+        <p><strong>Status:</strong> ${leitura.status}</p>
+      </div>
+
+      <div class="card-acoes">
+        <button class="btn-editar">✏️ Editar</button>
+        <button class="btn-remover">🗑️ Remover</button>
+      </div>
     `;
 
-    btnEditar.textContent  = 'Editar';
-    btnRemover.textContent = 'Remover';
+    const btnEditar = li.querySelector('.btn-editar');
+    const btnRemover = li.querySelector('.btn-remover');
 
     btnEditar.addEventListener('click', () => editar(index));
     btnRemover.addEventListener('click', () => remover(index));
 
-    li.append(btnEditar, btnRemover);
     ul.appendChild(li);
   });
 }
 
 function editar(index) {
   const lista = obterLeituras();
-  const l = lista[index];
-  const novoTitulo = prompt('Título:',  l.titulo);
-  if (novoTitulo === null) return;  // cancelou
+  const leitura = lista[index];
+
+  const novoTitulo = prompt('Título:', leitura.titulo);
+  if (novoTitulo === null) return;
+
+  const novoAutor = prompt('Autor:', leitura.autor);
+  if (novoAutor === null) return;
+
+  const novaData = prompt('Data de Início:', leitura.data);
+  if (novaData === null) return;
+
+  const novoStatus = prompt(
+    'Status (Em andamento ou Concluída):',
+    leitura.status
+  );
+  if (novoStatus === null) return;
+
   lista[index] = {
     titulo: novoTitulo.trim(),
-    autor:  prompt('Autor:',  l.autor).trim(),
-    data:   prompt('Data:',   l.data).trim(),
-    status: prompt('Status (Em andamento / Concluída):', l.status).trim()
+    autor: novoAutor.trim(),
+    data: novaData.trim(),
+    status: novoStatus.trim()
   };
+
   salvarLeituras(lista);
   renderizar();
 }
 
 function remover(index) {
   const lista = obterLeituras();
-  lista.splice(index, 1);  // remove 1 item na posição index
+
+  const confirmar = confirm(
+    'Tem certeza que deseja remover esta leitura?'
+  );
+
+  if (!confirmar) return;
+
+  lista.splice(index, 1);
+
   salvarLeituras(lista);
   renderizar();
 }
