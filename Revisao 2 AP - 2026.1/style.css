@@ -1,0 +1,266 @@
+:root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --surface2:  #222637;
+      --border:    #2e3352;
+      --text:      #dde3f5;
+      --muted:     #6b7599;
+      --accent:    #7c9ef8;
+      --accent2:   #a78bfa;
+      --green:     #6ee7a8;
+      --yellow:    #fbbf24;
+      --red:       #f87171;
+      --code-bg:   #131624;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #0d1b4b 0%, #1a1d27 60%, #0f1117 100%);
+      padding: 60px 24px 48px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* ── NAV ÍNDICE ── */
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      padding: 28px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .toc a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: background .15s, border-color .15s;
+    }
+    .toc a:hover { background: var(--surface2); border-color: var(--accent); }
+
+    /* ── LAYOUT ── */
+    main { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    section { margin-bottom: 64px; }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 24px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2 .num {
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--accent2);
+      margin: 28px 0 10px;
+    }
+
+    p { margin-bottom: 12px; color: var(--text); }
+
+    /* ── CARDS DE MÉTODO ── */
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 14px;
+      margin: 16px 0 24px;
+    }
+    .method-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+    }
+    .method-card .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .method-card code {
+      display: block;
+      font-family: 'Consolas', 'Fira Code', monospace;
+      font-size: 13.5px;
+      color: var(--green);
+      margin-bottom: 8px;
+    }
+    .method-card p { font-size: 13px; color: var(--muted); margin: 0; }
+
+    /* ── BLOCOS DE CÓDIGO ── */
+    .code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin: 16px 0;
+      overflow: hidden;
+    }
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 16px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      font-family: monospace;
+    }
+    .code-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dots { display: flex; gap: 6px; }
+    .dot-r { background: #f87171; }
+    .dot-y { background: #fbbf24; }
+    .dot-g { background: #6ee7a8; }
+    pre {
+      padding: 20px;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Fira Code', monospace;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .kw   { color: #c792ea; }
+    .fn   { color: #82aaff; }
+    .str  { color: #c3e88d; }
+    .cm   { color: #546e7a; font-style: italic; }
+    .num  { color: #f78c6c; }
+    .prop { color: #7fd0e8; }
+    .tag  { color: #f07178; }
+    .attr { color: #ffcb6b; }
+
+    /* ── CALLOUTS ── */
+    .callout {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 18px 0;
+      font-size: 14px;
+      border-left: 4px solid;
+    }
+    .callout.tip   { background: #0f2a1e; border-color: var(--green);  color: #a7f3d0; }
+    .callout.warn  { background: #2a1f0a; border-color: var(--yellow); color: #fde68a; }
+    .callout.error { background: #2a0f0f; border-color: var(--red);    color: #fca5a5; }
+    .callout.info  { background: #0f1e3a; border-color: var(--accent); color: #bfdbfe; }
+    .callout strong { display: block; margin-bottom: 4px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; }
+
+    /* ── TABELAS ── */
+    table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+    th { background: var(--surface2); color: var(--accent); padding: 10px 14px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; border-bottom: 2px solid var(--border); }
+    td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+    tr:hover td { background: var(--surface); }
+    td code { font-family: monospace; font-size: 12.5px; color: var(--green); background: var(--code-bg); padding: 2px 6px; border-radius: 4px; }
+
+    /* ── FLUXO / STEPS ── */
+    .steps { counter-reset: step; margin: 16px 0; }
+    .step {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--bg);
+      font-weight: 800;
+      font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .step-body { font-size: 14px; padding-top: 4px; }
+    .step-body strong { color: var(--accent2); }
+
+    /* ── QUIZ ── */
+    .quiz { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 20px 0; }
+    .quiz h4 { color: var(--yellow); font-size: 14px; margin-bottom: 12px; }
+    .quiz ol { padding-left: 20px; }
+    .quiz li { margin-bottom: 8px; font-size: 14px; }
+    details { margin-top: 12px; }
+    summary { cursor: pointer; color: var(--accent); font-size: 13px; font-weight: 600; }
+    .answer { margin-top: 10px; font-size: 13.5px; color: var(--green); padding: 10px 14px; background: var(--code-bg); border-radius: 6px; }
+
+    /* ── PROVA SIMULADA ── */
+    .exam-box {
+      background: var(--surface);
+      border: 2px solid var(--accent2);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+    .exam-box .pts {
+      display: inline-block;
+      background: var(--accent2);
+      color: var(--bg);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 10px;
+    }
+    .exam-box h4 { color: var(--text); font-size: 1rem; margin-bottom: 10px; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 28px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
