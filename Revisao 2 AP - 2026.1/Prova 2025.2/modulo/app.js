@@ -1,20 +1,25 @@
 import { obterTarefas, salvarTarefas } from './storage.js';
-import { renderizarLista }             from './dom.js';
+import { renderizarLista } from './dom.js';
 
-const input = document.getElementById('inputTarefa');
-const btn   = document.getElementById('btnAdicionar');
+const form = document.getElementById('formTarefa');
+const input = document.getElementById('descricao');
 
-btn.addEventListener('click', () => {
-  const texto = input.value.trim();
-  if (!texto) { alert('Digite uma tarefa!'); return; }
+form.addEventListener('submit', (event) => {
+    event.preventDefault();
 
-  const lista = obterTarefas();
-  lista.push(texto);
-  salvarTarefas(lista);
+    const texto = input.value.trim();
 
-  input.value = '';
-  renderizarLista();
+    if (!texto) return;
+
+    const tarefas = obterTarefas();
+
+    tarefas.push(texto);
+
+    salvarTarefas(tarefas);
+
+    input.value = '';
+
+    renderizarLista();
 });
 
-// Ao carregar a página, exibe as tarefas salvas
 renderizarLista();
