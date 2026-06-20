@@ -9,7 +9,7 @@ form.addEventListener('submit', (event) => {
 
     const texto = input.value.trim();
 
-    if (!texto) return;
+    if (!texto) { alert('Digite uma tarefa!'); return; };
 
     const tarefas = obterTarefas();
 
