@@ -1,1 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerenciador de Leituras</title>
+</head>
+<body>
+  <h1>Gerenciador de Leituras</h1>
 
+  <label>Título:  <input type="text" id="inTitulo" placeholder="Digite o título"></label>
+  <label>Autor:   <input type="text" id="inAutor"  placeholder="Nome do autor"></label>
+  <label>Data:    <input type="date" id="inData"></label>
+  <label>Status:
+    <select id="inStatus">
+      <option value="Em andamento">Em andamento</option>
+      <option value="Concluída">Concluída</option>
+    </select>
+  </label>
+  <button id="btnAdicionar">Adicionar Leitura</button>
+
+  <h2>Leituras Registradas</h2>
+  <ul id="listaLeituras"></ul>
+
+  <!-- type="module" é OBRIGATÓRIO para usar import/export -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
