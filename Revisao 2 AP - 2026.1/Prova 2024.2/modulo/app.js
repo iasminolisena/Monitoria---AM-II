@@ -1,7 +1,7 @@
 import { obterLeituras, salvarLeituras } from './storage.js';
 import { renderizar }                   from './dom.js';
 
-const btn = document.getElementById('btnAdicionar');
+const btn = document.getElementById('btn-adicionar');
 
 btn.addEventListener('click', () => {
   const titulo = document.getElementById('titulo').value.trim();
