@@ -1,39 +1,76 @@
 import { obterTarefas, salvarTarefas } from './storage.js';
 
 export function renderizarLista() {
-  const ul = document.getElementById('listaTarefas');
-  ul.innerHTML = '';  // limpa antes de redesenhar
+    const ul = document.getElementById('listaTarefas');
+    const contador = document.getElementById('contador');
+    const emptyState = document.getElementById('empty-state');
 
-  obterTarefas().forEach((tarefa, index) => {
-    const li         = document.createElement('li');
-    const span       = document.createElement('span');
-    const btnEditar  = document.createElement('button');
-    const btnExcluir = document.createElement('button');
+    const tarefas = obterTarefas();
 
-    span.textContent      = tarefa;
-    btnEditar.textContent  = 'Editar';
-    btnExcluir.textContent = 'Excluir';
+    ul.innerHTML = '';
 
-    btnEditar.addEventListener('click', () => editar(index));
-    btnExcluir.addEventListener('click', () => excluir(index));
+    contador.textContent =
+        `${tarefas.length} tarefa${tarefas.length !== 1 ? 's' : ''}`;
 
-    li.append(span, btnEditar, btnExcluir);
-    ul.appendChild(li);
-  });
+    emptyState.style.display =
+        tarefas.length === 0 ? 'block' : 'none';
+
+    tarefas.forEach((tarefa, index) => {
+
+        const li = document.createElement('li');
+        li.className = 'tarefa-card';
+
+        const span = document.createElement('span');
+        span.className = 'tarefa-texto';
+        span.textContent = tarefa;
+
+        const divAcoes = document.createElement('div');
+        divAcoes.className = 'tarefa-acoes';
+
+        const btnEditar = document.createElement('button');
+        btnEditar.className = 'btn btn-editar';
+        btnEditar.textContent = '✏️ Editar';
+
+        const btnExcluir = document.createElement('button');
+        btnExcluir.className = 'btn btn-excluir';
+        btnExcluir.textContent = '🗑️ Excluir';
+
+        btnEditar.addEventListener('click', () => editar(index));
+        btnExcluir.addEventListener('click', () => excluir(index));
+
+        divAcoes.append(btnEditar, btnExcluir);
+        li.append(span, divAcoes);
+
+        ul.appendChild(li);
+    });
 }
 
 function editar(index) {
-  const lista = obterTarefas();
-  const novo = prompt('Editar tarefa:', lista[index]);
-  if (novo === null || !novo.trim()) return;
-  lista[index] = novo.trim();
-  salvarTarefas(lista);
-  renderizarLista();
+    const tarefas = obterTarefas();
+
+    const novaDescricao = prompt(
+        'Editar tarefa:',
+        tarefas[index]
+    );
+
+    if (
+        novaDescricao === null ||
+        novaDescricao.trim() === ''
+    ) {
+        return;
+    }
+
+    tarefas[index] = novaDescricao.trim();
+
+    salvarTarefas(tarefas);
+    renderizarLista();
 }
 
 function excluir(index) {
-  const lista = obterTarefas();
-  lista.splice(index, 1);  // remove 1 item na posição index
-  salvarTarefas(lista);
-  renderizarLista();
+    const tarefas = obterTarefas();
+
+    tarefas.splice(index, 1);
+
+    salvarTarefas(tarefas);
+    renderizarLista();
 }
