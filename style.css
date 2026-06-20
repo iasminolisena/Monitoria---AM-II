@@ -266,9 +266,9 @@
     }
 
 iframe{
-      border-radius: 20px;
+      border: none;
 }
 
 .iframe-container{
-      
+      border-radius: 20px;
 }
