@@ -1,1 +1,1079 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css">
+  <title>Revisão — DOM & localStorage · Autoração Multimídia II</title>
+</head>
+<body>
+
+<div class="hero">
+  <div class="tag">Autoração Multimídia II · Prof. Henrique Pequeno · Monitora Iasmin Oliveira e Sena</div>
+  <h1>Revisão: DOM & localStorage</h1>
+  <p>Guia completo para a 2ª A.P — manipulação do DOM, módulos ES6 e persistência com localStorage.</p>
+</div>
+
+<nav class="toc">
+  <a href="#s1">1. O que é o DOM</a>
+  <a href="#s2">2. Encontrar elementos</a>
+  <a href="#s3">3. Modificar elementos</a>
+  <a href="#s4">4. Criar e remover</a>
+  <a href="#s5">5. Eventos</a>
+  <a href="#s6">6. Módulos ES6</a>
+  <a href="#s7">7. localStorage</a>
+  <a href="#s8">8. Padrão completo</a>
+  <a href="#s9">9. Prova Simulada</a>
+</nav>
+  
+<main>
+
+<section id="s1">
+  <h2><span class="num">01</span> O que é o DOM?</h2>
+
+  <p>Quando o navegador carrega um arquivo HTML, ele constrói uma <strong>árvore de objetos</strong> na memória. Essa árvore é o <strong>Document Object Model (DOM)</strong>. Cada tag HTML vira um <em>nó</em> que pode ser lido, alterado, criado ou removido via JavaScript — sem precisar recarregar a página.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>árvore DOM simplificada</span>
+    </div>
+    <pre>document
+ └── &lt;html&gt;
+      ├── &lt;head&gt;
+      │    └── &lt;title&gt;
+      └── &lt;body&gt;
+           ├── &lt;h1&gt;
+           ├── &lt;ul&gt;
+           │    ├── &lt;li&gt;
+           │    └── &lt;li&gt;
+           └── &lt;button&gt;</pre>
+  </div>
+
+  <p>O objeto <code>document</code> é a <strong>porta de entrada</strong>: todo acesso ao DOM começa por ele.</p>
+
+  <div class="callout info">
+    <strong>💡 conceito-chave</strong>
+    Manipular o DOM = acessar nós dessa árvore e mudar suas propriedades. A página atualiza na hora, sem reload.
+  </div>
+</section>
+
+<section id="s2">
+  <h2><span class="num">02</span> Encontrar elementos</h2>
+
+  <p>Antes de qualquer manipulação, precisamos <strong>selecionar</strong> o elemento. Existem cinco formas principais:</p>
+
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="label">Por ID</div>
+      <code>getElementById('id')</code>
+      <p>Retorna <strong>1 elemento</strong> exato. O mais rápido — use quando o elemento tem id único.</p>
+    </div>
+    <div class="method-card">
+      <div class="label">Por Tag</div>
+      <code>getElementsByTagName('li')</code>
+      <p>Retorna <strong>HTMLCollection</strong> (coleção "viva") de todos os elementos com aquela tag.</p>
+    </div>
+    <div class="method-card">
+      <div class="label">Por Classe</div>
+      <code>getElementsByClassName('cls')</code>
+      <p>Retorna <strong>HTMLCollection</strong> de todos os elementos com aquela classe CSS.</p>
+    </div>
+    <div class="method-card">
+      <div class="label">Moderno — 1 resultado</div>
+      <code>querySelector('.cls')</code>
+      <p>Aceita <strong>qualquer seletor CSS</strong>. Retorna o <em>primeiro</em> elemento que casar.</p>
+    </div>
+    <div class="method-card">
+      <div class="label">Moderno — vários</div>
+      <code>querySelectorAll('li')</code>
+      <p>Aceita <strong>qualquer seletor CSS</strong>. Retorna <em>NodeList</em> (tem <code>.forEach()</code>!).</p>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <strong>⚠️ diferença importante</strong>
+    <code>HTMLCollection</code> (getElementsBy…) <strong>não tem</strong> <code>.forEach()</code> diretamente. Use <code>Array.from(colecao).forEach(…)</code> ou prefira <code>querySelectorAll</code>, que retorna <code>NodeList</code> com suporte a <code>.forEach()</code>.
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>exemplos de seleção</span>
+    </div>
+    <pre><span class="cm">// Pelo id — retorna 1 elemento</span>
+<span class="kw">const</span> campo = document.<span class="fn">getElementById</span>(<span class="str">'novaTarefa'</span>);
+
+<span class="cm">// querySelector — seletor CSS, retorna o primeiro</span>
+<span class="kw">const</span> lista = document.<span class="fn">querySelector</span>(<span class="str">'#listaTarefas'</span>);
+
+<span class="cm">// querySelectorAll — todos os &lt;li&gt; dentro da lista</span>
+<span class="kw">const</span> itens = document.<span class="fn">querySelectorAll</span>(<span class="str">'#listaTarefas li'</span>);
+itens.<span class="fn">forEach</span>(item =&gt; console.<span class="fn">log</span>(item.<span class="prop">textContent</span>));</pre>
+  </div>
+</section>
+
+<section id="s3">
+  <h2><span class="num">03</span> Modificar elementos</h2>
+
+  <table>
+    <tr><th>Propriedade / Método</th><th>O que faz</th><th>Exemplo</th></tr>
+    <tr><td><code>element.innerHTML</code></td><td>Lê/escreve HTML interno (interpreta tags)</td><td><code>li.innerHTML = '&lt;b&gt;Texto&lt;/b&gt;'</code></td></tr>
+    <tr><td><code>element.textContent</code></td><td>Lê/escreve texto puro (sem tags)</td><td><code>span.textContent = 'Olá'</code></td></tr>
+    <tr><td><code>element.style.prop</code></td><td>Altera estilo inline</td><td><code>li.style.color = 'red'</code></td></tr>
+    <tr><td><code>element.classList.add()</code></td><td>Adiciona classe CSS</td><td><code>li.classList.add('concluida')</code></td></tr>
+    <tr><td><code>element.classList.remove()</code></td><td>Remove classe CSS</td><td><code>li.classList.remove('concluida')</code></td></tr>
+    <tr><td><code>element.classList.toggle()</code></td><td>Adiciona se não tem, remove se tem</td><td><code>li.classList.toggle('ativa')</code></td></tr>
+    <tr><td><code>element.setAttribute()</code></td><td>Define qualquer atributo HTML</td><td><code>input.setAttribute('type','checkbox')</code></td></tr>
+  </table>
+
+  <div class="callout tip">
+    <strong>✅ dica da prova</strong>
+    Prefira <code>textContent</code> para texto simples — é mais seguro que <code>innerHTML</code> pois não executa HTML injetado. Use <code>innerHTML</code> apenas quando precisar inserir tags de fato.
+  </div>
+
+  <h3>textContent vs innerText — qual usar?</h3>
+  <p>Ambas as propriedades leem e escrevem o texto de um elemento, mas têm comportamentos diferentes que podem pegar na prova:</p>
+
+  <table>
+    <tr><th>Característica</th><th><code>textContent</code></th><th><code>innerText</code></th></tr>
+    <tr>
+      <td>O que retorna</td>
+      <td>Todo o texto do elemento, <strong>incluindo</strong> o de elementos ocultos (<code>display:none</code>)</td>
+      <td>Só o texto <strong>visível</strong> na tela — respeita CSS</td>
+    </tr>
+    <tr>
+      <td>Tags filhas</td>
+      <td>Ignora tags, retorna texto puro de tudo</td>
+      <td>Interpreta a renderização: <code>&lt;br&gt;</code> vira <code>\n</code>, elementos ocultos são ignorados</td>
+    </tr>
+    <tr>
+      <td>Performance</td>
+      <td>✅ Mais rápido — não força reflow do layout</td>
+      <td>⚠️ Mais lento — o navegador precisa calcular o layout antes de responder</td>
+    </tr>
+    <tr>
+      <td>Segurança</td>
+      <td>✅ Nunca interpreta HTML — seguro contra XSS</td>
+      <td>✅ Também não interpreta HTML</td>
+    </tr>
+    <tr>
+      <td>Uso ideal</td>
+      <td>Escrever texto em elementos (é o padrão na prova)</td>
+      <td>Quando você precisa do texto exatamente como o usuário o vê</td>
+    </tr>
+  </table>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>textContent vs innerText — exemplo prático</span>
+    </div>
+    <pre><span class="cm">// HTML: &lt;div id="ex"&gt;Olá &lt;span style="display:none"&gt;oculto&lt;/span&gt; mundo&lt;/div&gt;</span>
+<span class="kw">const</span> div = document.<span class="fn">getElementById</span>(<span class="str">'ex'</span>);
+
+console.<span class="fn">log</span>(div.<span class="prop">textContent</span>);  <span class="cm">// → "Olá oculto mundo"  (inclui o span oculto)</span>
+console.<span class="fn">log</span>(div.<span class="prop">innerText</span>);     <span class="cm">// → "Olá mundo"         (ignora o span oculto)</span>
+
+<span class="cm">// Na ESCRITA, o comportamento é idêntico — define texto puro:</span>
+div.<span class="prop">textContent</span> = <span class="str">'Novo texto'</span>;  <span class="cm">// ✅ padrão recomendado na prova</span>
+div.<span class="prop">innerText</span>   = <span class="str">'Novo texto'</span>;  <span class="cm">// também funciona, mas evite por consistência</span></pre>
+  </div>
+
+  <div class="callout warn">
+    <strong>⚠️ resumo rápido para a prova</strong>
+    Use sempre <code>textContent</code> para definir texto em elementos criados com JS. Reserve <code>innerText</code> para quando precisar ler o texto <em>visível</em> de um elemento que pode ter filhos ocultos. Na prática da prova (criar spans, botões, li), <code>textContent</code> é a escolha certa.
+  </div>
+</section>
+
+<section id="s4">
+  <h2><span class="num">04</span> Criar e remover elementos</h2>
+
+  <h3>Fluxo de criação — 3 passos obrigatórios</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body"><strong>Criar em memória</strong> com <code>document.createElement('tag')</code>. O elemento existe, mas ainda não está na página.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body"><strong>Configurar</strong>: definir texto, classes, atributos e event listeners.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body"><strong>Inserir na página</strong> com <code>pai.appendChild(novo)</code>. Sem esse passo, o elemento é invisível — é o erro mais comum!</div>
+    </div>
+  </div>
+
+  <div class="callout error">
+    <strong>❌ erro clássico</strong>
+    Esquecer o <code>appendChild()</code>. O elemento existe em memória mas nunca aparece na tela.
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>criar um &lt;li&gt; com texto e botão excluir</span>
+    </div>
+    <pre><span class="kw">function</span> <span class="fn">criarItemLista</span>(texto, index) {
+  <span class="cm">// Passo 1 — criar</span>
+  <span class="kw">const</span> li  = document.<span class="fn">createElement</span>(<span class="str">'li'</span>);
+  <span class="kw">const</span> btn = document.<span class="fn">createElement</span>(<span class="str">'button'</span>);
+
+  <span class="cm">// Passo 2 — configurar</span>
+  li.<span class="prop">textContent</span> = texto;
+  btn.<span class="prop">textContent</span> = <span class="str">'Excluir'</span>;
+  btn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; <span class="fn">excluir</span>(index));
+
+  <span class="cm">// Passo 3 — inserir</span>
+  li.<span class="fn">appendChild</span>(btn);                          <span class="cm">// btn entra no li</span>
+  document.<span class="fn">getElementById</span>(<span class="str">'lista'</span>).<span class="fn">appendChild</span>(li); <span class="cm">// li entra na ul</span>
+}</pre>
+  </div>
+
+  <h3>Remover elementos</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>formas de remover</span>
+    </div>
+    <pre><span class="cm">// Forma moderna (recomendada) — remove a si mesmo</span>
+elemento.<span class="fn">remove</span>();
+
+<span class="cm">// Forma clássica — precisa do pai</span>
+pai.<span class="fn">removeChild</span>(filho);
+
+<span class="cm">// Limpar TUDO dentro de um elemento</span>
+ul.<span class="prop">innerHTML</span> = <span class="str">''</span>;   <span class="cm">// apaga todos os filhos de uma vez</span></pre>
+  </div>
+
+  <div class="callout tip">
+    <strong>✅ padrão da prova</strong>
+    O professor usa <code>ul.innerHTML = ''</code> para limpar a lista antes de redesenhar — é a forma mais simples e é aceita na prova.
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="num">05</span> Eventos com addEventListener</h2>
+
+  <p>Para reagir a interações do usuário (clique, digitação, envio de form), usamos <code>addEventListener</code>:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>sintaxe do addEventListener</span>
+    </div>
+    <pre><span class="cm">// elemento.addEventListener('evento', função)</span>
+btn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, <span class="fn">adicionarTarefa</span>);
+
+<span class="cm">// Ou com arrow function anônima</span>
+btn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; {
+  <span class="cm">// código aqui</span>
+});
+
+<span class="cm">// Passar índice para o callback (padrão da prova!)</span>
+btnExcluir.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; <span class="fn">excluirTarefa</span>(index));</pre>
+  </div>
+
+  <table>
+    <tr><th>Evento</th><th>Quando dispara</th></tr>
+    <tr><td><code>'click'</code></td><td>Usuário clica no elemento</td></tr>
+    <tr><td><code>'change'</code></td><td>Valor de input/checkbox muda</td></tr>
+    <tr><td><code>'input'</code></td><td>A cada tecla digitada</td></tr>
+    <tr><td><code>'keydown'</code></td><td>Tecla pressionada (útil para Enter)</td></tr>
+    <tr><td><code>'submit'</code></td><td>Formulário enviado</td></tr>
+  </table>
+</section>
+
+<section id="s6">
+  <h2><span class="num">06</span> Módulos ES6 (Questão 2 da prova)</h2>
+
+  <p>Módulos ES6 permitem <strong>dividir o código em arquivos separados</strong>, cada um com sua responsabilidade. A prova pede exatamente essa organização.</p>
+
+  <h3>Estrutura de diretórios esperada</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>organização de arquivos</span>
+    </div>
+    <pre>projeto/
+├── index.html       <span class="cm">← HTML + &lt;script type="module"&gt;</span>
+└── js/
+    ├── app.js       <span class="cm">← orquestrador: importa e inicializa</span>
+    ├── dom.js       <span class="cm">← manipulação do DOM (criar, renderizar)</span>
+    └── storage.js   <span class="cm">← localStorage (salvar, buscar)</span></pre>
+  </div>
+
+  <div class="callout warn">
+    <strong>⚠️ OBRIGATÓRIO no HTML</strong>
+    O script principal deve ter <code>type="module"</code>, caso contrário os imports não funcionam!
+    <br><code>&lt;script type="module" src="js/app.js"&gt;&lt;/script&gt;</code>
+  </div>
+
+  <h3>Como exportar e importar</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>storage.js — exporta funções</span>
+    </div>
+    <pre><span class="kw">const</span> KEY = <span class="str">'listaTarefas'</span>;
+
+<span class="cm">// "export" torna a função disponível para outros arquivos</span>
+<span class="kw">export function</span> <span class="fn">obterTarefas</span>() {
+  <span class="kw">return</span> JSON.<span class="fn">parse</span>(localStorage.<span class="fn">getItem</span>(KEY)) || [];
+}
+
+<span class="kw">export function</span> <span class="fn">salvarTarefas</span>(lista) {
+  localStorage.<span class="fn">setItem</span>(KEY, JSON.<span class="fn">stringify</span>(lista));
+}</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>dom.js — importa de storage e exporta renderizar</span>
+    </div>
+    <pre><span class="cm">// "import" traz funções de outro módulo</span>
+<span class="kw">import</span> { obterTarefas, salvarTarefas } <span class="kw">from</span> <span class="str">'./storage.js'</span>;
+
+<span class="kw">export function</span> <span class="fn">renderizarLista</span>() {
+  <span class="kw">const</span> ul = document.<span class="fn">getElementById</span>(<span class="str">'listaTarefas'</span>);
+  ul.<span class="prop">innerHTML</span> = <span class="str">''</span>;           <span class="cm">// limpa antes de redesenhar</span>
+  <span class="kw">const</span> tarefas = <span class="fn">obterTarefas</span>();
+
+  tarefas.<span class="fn">forEach</span>((tarefa, index) =&gt; {
+    <span class="kw">const</span> li  = document.<span class="fn">createElement</span>(<span class="str">'li'</span>);
+    <span class="kw">const</span> btn = document.<span class="fn">createElement</span>(<span class="str">'button'</span>);
+    li.<span class="prop">textContent</span>  = tarefa.texto;
+    btn.<span class="prop">textContent</span> = <span class="str">'Excluir'</span>;
+    btn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; <span class="fn">excluir</span>(index));
+    li.<span class="fn">appendChild</span>(btn);
+    ul.<span class="fn">appendChild</span>(li);
+  });
+}
+
+<span class="kw">function</span> <span class="fn">excluir</span>(index) {
+  <span class="kw">const</span> lista = <span class="fn">obterTarefas</span>();
+  lista.<span class="fn">splice</span>(index, <span class="num">1</span>);   <span class="cm">// remove 1 item na posição index</span>
+  <span class="fn">salvarTarefas</span>(lista);
+  <span class="fn">renderizarLista</span>();
+}</pre>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>app.js — orquestrador</span>
+    </div>
+    <pre><span class="kw">import</span> { obterTarefas, salvarTarefas } <span class="kw">from</span> <span class="str">'./storage.js'</span>;
+<span class="kw">import</span> { renderizarLista }             <span class="kw">from</span> <span class="str">'./dom.js'</span>;
+
+<span class="kw">const</span> input = document.<span class="fn">getElementById</span>(<span class="str">'novaTarefa'</span>);
+<span class="kw">const</span> btn   = document.<span class="fn">getElementById</span>(<span class="str">'btnAdicionar'</span>);
+
+btn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; {
+  <span class="kw">const</span> texto = input.<span class="prop">value</span>.<span class="fn">trim</span>();
+  <span class="kw">if</span> (!texto) { alert(<span class="str">'Digite uma tarefa!'</span>); <span class="kw">return</span>; }
+
+  <span class="kw">const</span> lista = <span class="fn">obterTarefas</span>();
+  lista.<span class="fn">push</span>({ texto, concluida: <span class="kw">false</span> });
+  <span class="fn">salvarTarefas</span>(lista);
+
+  input.<span class="prop">value</span> = <span class="str">''</span>;
+  <span class="fn">renderizarLista</span>();
+});
+
+<span class="cm">// Carrega a lista ao abrir a página</span>
+<span class="fn">renderizarLista</span>();</pre>
+  </div>
+
+  <div class="callout info">
+    <strong>📌 resumo de módulos</strong>
+    <code>export function nome(){}</code> → torna disponível para outros arquivos.<br>
+    <code>import { nome } from './arquivo.js'</code> → importa de outro módulo.<br>
+    Sempre use <code>./</code> antes do nome do arquivo no import.
+  </div>
+</section>
+
+<section id="s7">
+  <h2><span class="num">07</span> localStorage (Questão 3 da prova)</h2>
+
+  <p>O <code>localStorage</code> salva dados no navegador do usuário. Os dados <strong>persistem mesmo após fechar e reabrir</strong> o navegador (ao contrário das variáveis JS, que somem ao recarregar a página).</p>
+
+  <h3>Os 4 métodos essenciais</h3>
+
+  <div class="method-grid">
+    <div class="method-card">
+      <div class="label">Salvar</div>
+      <code>localStorage.setItem(chave, valor)</code>
+      <p>Grava um par chave → valor. Valor deve ser <strong>string</strong>.</p>
+    </div>
+    <div class="method-card">
+      <div class="label">Ler</div>
+      <code>localStorage.getItem(chave)</code>
+      <p>Retorna o valor como string (ou <code>null</code> se não existir).</p>
+    </div>
+    <div class="method-card">
+      <div class="label">Remover 1</div>
+      <code>localStorage.removeItem(chave)</code>
+      <p>Remove apenas aquela chave do storage.</p>
+    </div>
+    <div class="method-card">
+      <div class="label">Limpar tudo</div>
+      <code>localStorage.clear()</code>
+      <p>Apaga <em>todos</em> os dados do domínio atual.</p>
+    </div>
+  </div>
+
+  <h3>Armazenar objetos/arrays — JSON obrigatório</h3>
+
+  <p>O localStorage só aceita <strong>strings</strong>. Para guardar objetos ou arrays, usamos <code>JSON.stringify()</code> ao salvar e <code>JSON.parse()</code> ao ler:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>salvar e recuperar array de objetos</span>
+    </div>
+    <pre><span class="cm">// ── SALVAR ──</span>
+<span class="kw">const</span> tarefas = [
+  { texto: <span class="str">'Estudar DOM'</span>, concluida: <span class="kw">false</span> },
+  { texto: <span class="str">'Fazer prova'</span>, concluida: <span class="kw">false</span> }
+];
+<span class="cm">// Converte array → string antes de guardar</span>
+localStorage.<span class="fn">setItem</span>(<span class="str">'listaTarefas'</span>, JSON.<span class="fn">stringify</span>(tarefas));
+
+<span class="cm">// ── LER ──</span>
+<span class="cm">// Converte string → array ao recuperar</span>
+<span class="cm">// O "|| []" evita erro se a chave não existir ainda</span>
+<span class="kw">const</span> lista = JSON.<span class="fn">parse</span>(localStorage.<span class="fn">getItem</span>(<span class="str">'listaTarefas'</span>)) || [];</pre>
+  </div>
+
+  <div class="callout error">
+    <strong>❌ erro clássico</strong>
+    Esquecer o <code>JSON.stringify()</code> ao salvar salva <code>[object Object]</code> em vez dos dados reais. Sempre converta!
+  </div>
+
+  <h3>Padrão de uso na prova (funções utilitárias)</h3>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>funções reutilizáveis de storage</span>
+    </div>
+    <pre><span class="kw">const</span> KEY = <span class="str">'listaTarefas'</span>;
+
+<span class="cm">// Lê a lista do storage (retorna [] se vazio)</span>
+<span class="kw">function</span> <span class="fn">obterLista</span>() {
+  <span class="kw">return</span> JSON.<span class="fn">parse</span>(localStorage.<span class="fn">getItem</span>(KEY)) || [];
+}
+
+<span class="cm">// Salva a lista no storage</span>
+<span class="kw">function</span> <span class="fn">salvarLista</span>(lista) {
+  localStorage.<span class="fn">setItem</span>(KEY, JSON.<span class="fn">stringify</span>(lista));
+}
+
+<span class="cm">// ── Adicionar ──</span>
+<span class="kw">function</span> <span class="fn">adicionarTarefa</span>(texto) {
+  <span class="kw">const</span> lista = <span class="fn">obterLista</span>();
+  lista.<span class="fn">push</span>({ texto, concluida: <span class="kw">false</span> });
+  <span class="fn">salvarLista</span>(lista);
+}
+
+<span class="cm">// ── Editar ──</span>
+<span class="kw">function</span> <span class="fn">editarTarefa</span>(index, novoTexto) {
+  <span class="kw">const</span> lista = <span class="fn">obterLista</span>();
+  lista[index].texto = novoTexto;
+  <span class="fn">salvarLista</span>(lista);
+}
+
+<span class="cm">// ── Excluir ──</span>
+<span class="kw">function</span> <span class="fn">excluirTarefa</span>(index) {
+  <span class="kw">const</span> lista = <span class="fn">obterLista</span>();
+  lista.<span class="fn">splice</span>(index, <span class="num">1</span>);  <span class="cm">// remove 1 item na posição index</span>
+  <span class="fn">salvarLista</span>(lista);
+}</pre>
+  </div>
+
+  <div class="callout tip">
+    <strong>✅ dica: array.splice(index, 1)</strong>
+    <code>splice(index, 1)</code> remove <strong>1 elemento</strong> a partir da posição <code>index</code>. É o método padrão do professor para excluir tarefas. Memorize!
+  </div>
+</section>
+
+<section id="s8">
+  <h2><span class="num">08</span> Padrão completo — Gerenciador de Tarefas</h2>
+
+  <p>Esse é o <strong>esqueleto exato</strong> do que a prova pede (Questões 1+2+3 integradas). Estude linha a linha.</p>
+
+  <h3>index.html</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>index.html</span>
+    </div>
+    <pre><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="attr">lang</span>=<span class="str">"pt-BR"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="attr">charset</span>=<span class="str">"UTF-8"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;title&gt;</span>Gerenciador de Tarefas<span class="tag">&lt;/title&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Gerenciador de Tarefas<span class="tag">&lt;/h1&gt;</span>
+
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="attr">id</span>=<span class="str">"novaTarefa"</span> <span class="attr">placeholder</span>=<span class="str">"Digite a tarefa"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">id</span>=<span class="str">"btnAdicionar"</span><span class="tag">&gt;</span>Adicionar<span class="tag">&lt;/button&gt;</span>
+
+  <span class="tag">&lt;ul</span> <span class="attr">id</span>=<span class="str">"listaTarefas"</span><span class="tag">&gt;&lt;/ul&gt;</span>
+
+  <span class="cm">&lt;!-- type="module" é OBRIGATÓRIO para usar import/export --&gt;</span>
+  <span class="tag">&lt;script</span> <span class="attr">type</span>=<span class="str">"module"</span> <span class="attr">src</span>=<span class="str">"js/app.js"</span><span class="tag">&gt;&lt;/script&gt;</span>
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></pre>
+  </div>
+
+  <h3>js/storage.js</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>js/storage.js — responsável APENAS pelo localStorage</span>
+    </div>
+    <pre><span class="kw">const</span> KEY = <span class="str">'listaTarefas'</span>;
+
+<span class="kw">export function</span> <span class="fn">obterTarefas</span>() {
+  <span class="kw">return</span> JSON.<span class="fn">parse</span>(localStorage.<span class="fn">getItem</span>(KEY)) || [];
+}
+
+<span class="kw">export function</span> <span class="fn">salvarTarefas</span>(lista) {
+  localStorage.<span class="fn">setItem</span>(KEY, JSON.<span class="fn">stringify</span>(lista));
+}</pre>
+  </div>
+
+  <h3>js/dom.js</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>js/dom.js — responsável pela criação/remoção de elementos</span>
+    </div>
+    <pre><span class="kw">import</span> { obterTarefas, salvarTarefas } <span class="kw">from</span> <span class="str">'./storage.js'</span>;
+
+<span class="cm">// Renderiza TODA a lista do zero</span>
+<span class="kw">export function</span> <span class="fn">renderizarLista</span>() {
+  <span class="kw">const</span> ul = document.<span class="fn">getElementById</span>(<span class="str">'listaTarefas'</span>);
+  ul.<span class="prop">innerHTML</span> = <span class="str">''</span>;  <span class="cm">// limpa antes de redesenhar</span>
+
+  <span class="fn">obterTarefas</span>().<span class="fn">forEach</span>((tarefa, index) =&gt; {
+    <span class="kw">const</span> li  = document.<span class="fn">createElement</span>(<span class="str">'li'</span>);
+    <span class="kw">const</span> span = document.<span class="fn">createElement</span>(<span class="str">'span'</span>);
+    <span class="kw">const</span> btnEditar  = document.<span class="fn">createElement</span>(<span class="str">'button'</span>);
+    <span class="kw">const</span> btnExcluir = document.<span class="fn">createElement</span>(<span class="str">'button'</span>);
+
+    span.<span class="prop">textContent</span>      = tarefa.texto;
+    btnEditar.<span class="prop">textContent</span>  = <span class="str">'Editar'</span>;
+    btnExcluir.<span class="prop">textContent</span> = <span class="str">'Excluir'</span>;
+
+    btnEditar.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; <span class="fn">editar</span>(index));
+    btnExcluir.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; <span class="fn">excluir</span>(index));
+
+    li.<span class="fn">append</span>(span, btnEditar, btnExcluir);
+    ul.<span class="fn">appendChild</span>(li);
+  });
+}
+
+<span class="kw">function</span> <span class="fn">editar</span>(index) {
+  <span class="kw">const</span> lista = <span class="fn">obterTarefas</span>();
+  <span class="kw">const</span> novoTexto = prompt(<span class="str">'Novo texto:'</span>, lista[index].texto);
+  <span class="kw">if</span> (novoTexto === <span class="kw">null</span> || !novoTexto.<span class="fn">trim</span>()) <span class="kw">return</span>;
+  lista[index].texto = novoTexto.<span class="fn">trim</span>();
+  <span class="fn">salvarTarefas</span>(lista);
+  <span class="fn">renderizarLista</span>();  <span class="cm">// atualiza a exibição</span>
+}
+
+<span class="kw">function</span> <span class="fn">excluir</span>(index) {
+  <span class="kw">const</span> lista = <span class="fn">obterTarefas</span>();
+  lista.<span class="fn">splice</span>(index, <span class="num">1</span>);  <span class="cm">// remove 1 item</span>
+  <span class="fn">salvarTarefas</span>(lista);
+  <span class="fn">renderizarLista</span>();  <span class="cm">// atualiza a exibição</span>
+}</pre>
+  </div>
+
+  <h3>js/app.js</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>js/app.js — orquestrador, importa e inicializa tudo</span>
+    </div>
+    <pre><span class="kw">import</span> { obterTarefas, salvarTarefas } <span class="kw">from</span> <span class="str">'./storage.js'</span>;
+<span class="kw">import</span> { renderizarLista }             <span class="kw">from</span> <span class="str">'./dom.js'</span>;
+
+<span class="kw">const</span> input = document.<span class="fn">getElementById</span>(<span class="str">'novaTarefa'</span>);
+<span class="kw">const</span> btn   = document.<span class="fn">getElementById</span>(<span class="str">'btnAdicionar'</span>);
+
+btn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; {
+  <span class="kw">const</span> texto = input.<span class="prop">value</span>.<span class="fn">trim</span>();
+  <span class="kw">if</span> (!texto) { alert(<span class="str">'Digite uma tarefa!'</span>); <span class="kw">return</span>; }
+
+  <span class="kw">const</span> lista = <span class="fn">obterTarefas</span>();
+  lista.<span class="fn">push</span>({ texto, concluida: <span class="kw">false</span> });
+  <span class="fn">salvarTarefas</span>(lista);
+
+  input.<span class="prop">value</span> = <span class="str">''</span>;
+  <span class="fn">renderizarLista</span>();
+});
+
+<span class="cm">// Ao carregar a página, exibe as tarefas salvas</span>
+<span class="fn">renderizarLista</span>();</pre>
+  </div>
+
+  <h3>Fluxo completo: o que acontece ao adicionar uma tarefa</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">Usuário digita no input e clica em <strong>Adicionar</strong></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body"><code>app.js</code> lê o texto, chama <code>obterTarefas()</code> → pega a lista atual do localStorage</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">Faz <code>lista.push({texto, concluida: false})</code> → adiciona ao array</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">Chama <code>salvarTarefas(lista)</code> → grava o array atualizado no localStorage via JSON.stringify</div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">Chama <code>renderizarLista()</code> → limpa o <code>&lt;ul&gt;</code> e redesenha todos os itens</div>
+    </div>
+  </div>
+</section>
+
+  <p style="color:var(--muted);font-size:13.5px;margin-bottom:8px;">
+    Abaixo estão as provas reais aplicadas pelo Prof. Henrique Pequeno. Cada prova é exibida na íntegra, seguida de um gabarito unificado no padrão de 4 arquivos (<code>index.html</code> · <code>storage.js</code> · <code>dom.js</code> · <code>app.js</code>).
+  </p>
+  <div class="callout warn" style="margin-bottom:32px;">
+    <strong>⚠️ estratégia de estudo</strong>
+    As duas provas seguem <strong>exatamente o mesmo padrão</strong>: Q1 = DOM puro · Q2 = módulos ES6 · Q3 = localStorage. O tema muda (Leituras vs Tarefas), a estrutura não. Domine o padrão e você resolve qualquer variação.
+  </div>
+  
+  <h3 style="font-size:1.15rem;color:var(--accent);margin-bottom:20px;">
+    📄 2ª A.P. — Autoração Multimídia II (2024.2)
+  </h3>
+
+  <!-- Q1 2024.2 -->
+  <div class="exam-box">
+    <div class="pts">Questão 1 · 4,0 pts</div>
+    <h4>Gerenciador de Leituras — DOM puro (arquivo único)</h4>
+    <p>Desenvolva uma solução que funcione como um <strong>Gerenciador de Leituras</strong>. A aplicação deve permitir que o usuário registre e acompanhe livros, artigos ou outros materiais que deseja ler ou já leu. A aplicação deve permitir as seguintes operações:</p>
+    <p style="margin-top:10px;font-weight:700;font-size:14px;color:var(--accent2);">Adicionar uma Nova Leitura com os campos:</p>
+    <ul style="margin:8px 0 12px 20px;font-size:14px;line-height:2;">
+      <li><strong>Título:</strong> Nome do livro/artigo</li>
+      <li><strong>Autor:</strong> Nome do autor do material</li>
+      <li><strong>Data de Início:</strong> Data em que o usuário começou a leitura</li>
+      <li><strong>Status:</strong> "Em andamento" ou "Concluída" (usar <code>&lt;select&gt;</code>)</li>
+    </ul>
+    <p style="font-size:14px;"><strong>Remover Leituras:</strong> funcionalidade que permita ao usuário remover leituras da lista.</p>
+    <p style="font-size:14px;margin-top:6px;"><strong>Editar Leituras:</strong> funcionalidade que permita editar os campos de um registro de leitura.</p>
+    <p style="font-size:14px;margin-top:6px;color:var(--muted);">Obs.: qualquer alteração (adição, remoção ou edição) deve ser prontamente refletida na exibição da lista.</p>
+  </div>
+
+  <!-- Q2 2024.2 -->
+  <div class="exam-box">
+    <div class="pts">Questão 2 · 2,0 pts</div>
+    <h4>Refatorar para Módulos ES6</h4>
+    <p>Utilizando a aplicação da Questão 1, refatore o código para utilizar <strong>módulos JavaScript</strong>. Separe a lógica em diferentes arquivos, por exemplo:</p>
+    <ul style="margin:8px 0 12px 20px;font-size:14px;line-height:2;">
+      <li>Um módulo para <strong>manipulação do DOM</strong></li>
+      <li>Um módulo para <strong>gerenciamento da lista de leituras</strong></li>
+      <li>As funcionalidades devem permanecer as mesmas</li>
+    </ul>
+  </div>
+
+  <!-- Q3 2024.2 -->
+  <div class="exam-box">
+    <div class="pts">Questão 3 · 4,0 pts</div>
+    <h4>Persistência com localStorage</h4>
+    <p>Utilizando o mesmo Gerenciador de Leituras, implemente uma versão que armazene as leituras no <strong>localStorage</strong>. Requisitos:</p>
+    <ul style="margin:8px 0 12px 20px;font-size:14px;line-height:2;">
+      <li>Ao adicionar uma leitura, ela deve ser salva no localStorage</li>
+      <li>Ao remover uma leitura, o localStorage deve ser atualizado</li>
+      <li>Ao carregar a página, as leituras salvas devem ser exibidas automaticamente</li>
+    </ul>
+  </div>
+
+  <!-- ── GABARITO 2024.2 ── -->
+  <h3 style="margin-top:36px;color:var(--green);">✅ Gabarito 2024.2 — Padrão completo (4 arquivos)</h3>
+
+  <h3>index.html</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>index.html</span>
+    </div>
+    <pre><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="attr">lang</span>=<span class="str">"pt-BR"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="attr">charset</span>=<span class="str">"UTF-8"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;title&gt;</span>Gerenciador de Leituras<span class="tag">&lt;/title&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Gerenciador de Leituras<span class="tag">&lt;/h1&gt;</span>
+
+  <span class="tag">&lt;label&gt;</span>Título:  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="attr">id</span>=<span class="str">"inTitulo"</span> <span class="attr">placeholder</span>=<span class="str">"Digite o título"</span><span class="tag">&gt;&lt;/label&gt;</span>
+  <span class="tag">&lt;label&gt;</span>Autor:   <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="attr">id</span>=<span class="str">"inAutor"</span>  <span class="attr">placeholder</span>=<span class="str">"Nome do autor"</span><span class="tag">&gt;&lt;/label&gt;</span>
+  <span class="tag">&lt;label&gt;</span>Data:    <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="str">"date"</span> <span class="attr">id</span>=<span class="str">"inData"</span><span class="tag">&gt;&lt;/label&gt;</span>
+  <span class="tag">&lt;label&gt;</span>Status:
+    <span class="tag">&lt;select</span> <span class="attr">id</span>=<span class="str">"inStatus"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="str">"Em andamento"</span><span class="tag">&gt;</span>Em andamento<span class="tag">&lt;/option&gt;</span>
+      <span class="tag">&lt;option</span> <span class="attr">value</span>=<span class="str">"Concluída"</span><span class="tag">&gt;</span>Concluída<span class="tag">&lt;/option&gt;</span>
+    <span class="tag">&lt;/select&gt;</span>
+  <span class="tag">&lt;/label&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">id</span>=<span class="str">"btnAdicionar"</span><span class="tag">&gt;</span>Adicionar Leitura<span class="tag">&lt;/button&gt;</span>
+
+  <span class="tag">&lt;h2&gt;</span>Leituras Registradas<span class="tag">&lt;/h2&gt;</span>
+  <span class="tag">&lt;ul</span> <span class="attr">id</span>=<span class="str">"listaLeituras"</span><span class="tag">&gt;&lt;/ul&gt;</span>
+
+  <span class="cm">&lt;!-- type="module" é OBRIGATÓRIO para usar import/export --&gt;</span>
+  <span class="tag">&lt;script</span> <span class="attr">type</span>=<span class="str">"module"</span> <span class="attr">src</span>=<span class="str">"js/app.js"</span><span class="tag">&gt;&lt;/script&gt;</span>
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></pre>
+  </div>
+
+  <h3>js/storage.js</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>js/storage.js — responsável APENAS pelo localStorage</span>
+    </div>
+    <pre><span class="kw">const</span> KEY = <span class="str">'leituras-app'</span>;
+
+<span class="kw">export function</span> <span class="fn">obterLeituras</span>() {
+  <span class="kw">return</span> JSON.<span class="fn">parse</span>(localStorage.<span class="fn">getItem</span>(KEY)) || [];
+  <span class="cm">//     ↑ parse obrigatório              ↑ fallback para array vazio</span>
+}
+
+<span class="kw">export function</span> <span class="fn">salvarLeituras</span>(lista) {
+  localStorage.<span class="fn">setItem</span>(KEY, JSON.<span class="fn">stringify</span>(lista));
+  <span class="cm">//                         ↑ stringify obrigatório</span>
+}</pre>
+  </div>
+
+  <h3>js/dom.js</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>js/dom.js — criação e remoção de elementos da lista</span>
+    </div>
+    <pre><span class="kw">import</span> { obterLeituras, salvarLeituras } <span class="kw">from</span> <span class="str">'./storage.js'</span>;
+
+<span class="kw">export function</span> <span class="fn">renderizar</span>() {
+  <span class="kw">const</span> ul = document.<span class="fn">getElementById</span>(<span class="str">'listaLeituras'</span>);
+  ul.<span class="prop">innerHTML</span> = <span class="str">''</span>;  <span class="cm">// limpa antes de redesenhar</span>
+
+  <span class="fn">obterLeituras</span>().<span class="fn">forEach</span>((leitura, index) =&gt; {
+    <span class="kw">const</span> li         = document.<span class="fn">createElement</span>(<span class="str">'li'</span>);
+    <span class="kw">const</span> btnEditar  = document.<span class="fn">createElement</span>(<span class="str">'button'</span>);
+    <span class="kw">const</span> btnRemover = document.<span class="fn">createElement</span>(<span class="str">'button'</span>);
+
+    li.<span class="prop">innerHTML</span> = <span class="str">`
+      &lt;strong&gt;${leitura.titulo}&lt;/strong&gt;&lt;br&gt;
+      Autor: ${leitura.autor}&lt;br&gt;
+      Data de Início: ${leitura.data}&lt;br&gt;
+      Status: ${leitura.status}
+    `</span>;
+
+    btnEditar.<span class="prop">textContent</span>  = <span class="str">'Editar'</span>;
+    btnRemover.<span class="prop">textContent</span> = <span class="str">'Remover'</span>;
+
+    btnEditar.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; <span class="fn">editar</span>(index));
+    btnRemover.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; <span class="fn">remover</span>(index));
+
+    li.<span class="fn">append</span>(btnEditar, btnRemover);
+    ul.<span class="fn">appendChild</span>(li);
+  });
+}
+
+<span class="kw">function</span> <span class="fn">editar</span>(index) {
+  <span class="kw">const</span> lista = <span class="fn">obterLeituras</span>();
+  <span class="kw">const</span> l = lista[index];
+  <span class="kw">const</span> novoTitulo = prompt(<span class="str">'Título:'</span>,  l.titulo);
+  <span class="kw">if</span> (novoTitulo === <span class="kw">null</span>) <span class="kw">return</span>;  <span class="cm">// cancelou</span>
+  lista[index] = {
+    titulo: novoTitulo.<span class="fn">trim</span>(),
+    autor:  prompt(<span class="str">'Autor:'</span>,  l.autor).<span class="fn">trim</span>(),
+    data:   prompt(<span class="str">'Data:'</span>,   l.data).<span class="fn">trim</span>(),
+    status: prompt(<span class="str">'Status (Em andamento / Concluída):'</span>, l.status).<span class="fn">trim</span>()
+  };
+  <span class="fn">salvarLeituras</span>(lista);
+  <span class="fn">renderizar</span>();
+}
+
+<span class="kw">function</span> <span class="fn">remover</span>(index) {
+  <span class="kw">const</span> lista = <span class="fn">obterLeituras</span>();
+  lista.<span class="fn">splice</span>(index, <span class="num">1</span>);  <span class="cm">// remove 1 item na posição index</span>
+  <span class="fn">salvarLeituras</span>(lista);
+  <span class="fn">renderizar</span>();
+}</pre>
+  </div>
+
+  <h3>js/app.js</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>js/app.js — orquestrador, importa e inicializa tudo</span>
+    </div>
+    <pre><span class="kw">import</span> { obterLeituras, salvarLeituras } <span class="kw">from</span> <span class="str">'./storage.js'</span>;
+<span class="kw">import</span> { renderizar }                   <span class="kw">from</span> <span class="str">'./dom.js'</span>;
+
+<span class="kw">const</span> btn = document.<span class="fn">getElementById</span>(<span class="str">'btnAdicionar'</span>);
+
+btn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; {
+  <span class="kw">const</span> titulo = document.<span class="fn">getElementById</span>(<span class="str">'inTitulo'</span>).<span class="prop">value</span>.<span class="fn">trim</span>();
+  <span class="kw">const</span> autor  = document.<span class="fn">getElementById</span>(<span class="str">'inAutor'</span>).<span class="prop">value</span>.<span class="fn">trim</span>();
+  <span class="kw">const</span> data   = document.<span class="fn">getElementById</span>(<span class="str">'inData'</span>).<span class="prop">value</span>;
+  <span class="kw">const</span> status = document.<span class="fn">getElementById</span>(<span class="str">'inStatus'</span>).<span class="prop">value</span>;
+
+  <span class="kw">if</span> (!titulo || !autor) { alert(<span class="str">'Preencha ao menos título e autor!'</span>); <span class="kw">return</span>; }
+
+  <span class="kw">const</span> lista = <span class="fn">obterLeituras</span>();
+  lista.<span class="fn">push</span>({ titulo, autor, data, status });
+  <span class="fn">salvarLeituras</span>(lista);
+
+  <span class="cm">// Limpa os campos após adicionar</span>
+  document.<span class="fn">getElementById</span>(<span class="str">'inTitulo'</span>).<span class="prop">value</span> = <span class="str">''</span>;
+  document.<span class="fn">getElementById</span>(<span class="str">'inAutor'</span>).<span class="prop">value</span>  = <span class="str">''</span>;
+  document.<span class="fn">getElementById</span>(<span class="str">'inData'</span>).<span class="prop">value</span>   = <span class="str">''</span>;
+
+  <span class="fn">renderizar</span>();
+});
+
+<span class="cm">// Ao carregar a página, exibe as leituras salvas</span>
+<span class="fn">renderizar</span>();</pre>
+  </div>
+
+  <div class="callout tip" style="margin-top:8px;">
+    <strong>⭐ pontos críticos 2024.2</strong>
+    Cada leitura é um <strong>objeto</strong> com 4 campos (não string simples) · <code>JSON.parse || []</code> ao ler · <code>JSON.stringify</code> ao gravar · constante <code>KEY</code> · <code>splice(index, 1)</code> para remover · <code>renderizar()</code> no final do app.js.
+  </div>
+
+
+  <!-- ════════════════════════════════════ -->
+  <!--  PROVA 2025.2                       -->
+  <!-- ════════════════════════════════════ -->
+  <h3 style="font-size:1.15rem;color:var(--accent);margin:48px 0 20px;">
+    📄 1ª Chamada da 2ª A.P. — Autoração Multimídia II (2025.2)
+  </h3>
+
+  <!-- Q1 2025.2 -->
+  <div class="exam-box">
+    <div class="pts">Questão 1 · 5,0 pts</div>
+    <h4>Gerenciador de Tarefas Pessoais — DOM puro</h4>
+    <p>Desenvolva uma aplicação web que funcione como um <strong>Gerenciador de Tarefas Pessoais</strong>. A aplicação deve permitir ao usuário <strong>adicionar, visualizar, editar e excluir tarefas</strong>, utilizando manipulação direta do DOM, atendendo aos seguintes requisitos:</p>
+    <ul style="margin:8px 0 12px 20px;font-size:14px;line-height:2;">
+      <li>O cadastro deve ser feito por meio de um campo de input e um botão <strong>Adicionar</strong></li>
+      <li>As tarefas devem ser exibidas em uma lista <code>&lt;ul&gt;</code></li>
+      <li>Cada item da lista <code>&lt;li&gt;</code> deve conter: a descrição da tarefa + botão <strong>Editar</strong> + botão <strong>Excluir</strong></li>
+      <li>Ao clicar em Editar, a descrição deve poder ser alterada (via <code>prompt()</code> ou campo inline)</li>
+      <li>Ao clicar em Excluir, <strong>apenas</strong> a tarefa correspondente deve ser removida</li>
+      <li>A lista deve ser atualizada automaticamente a cada operação</li>
+    </ul>
+  </div>
+
+  <!-- Q2 2025.2 -->
+  <div class="exam-box">
+    <div class="pts">Questão 2 · 2,0 pts</div>
+    <h4>Reorganizar para Módulos ES6</h4>
+    <p>Utilizando a aplicação da Questão 1, reorganize o código para utilizar <strong>módulos JavaScript</strong>. A solução deve estar organizada, no mínimo, em:</p>
+    <ul style="margin:8px 0 12px 20px;font-size:14px;line-height:2;">
+      <li>Um módulo responsável pela <strong>manipulação do DOM</strong> (criação, atualização e remoção de elementos da lista)</li>
+      <li>Um módulo responsável pelo <strong>gerenciamento das tarefas</strong> (adicionar, editar e remover)</li>
+      <li>Um <strong>arquivo principal</strong> que importe os módulos e inicialize a aplicação</li>
+      <li>As funcionalidades devem permanecer as mesmas</li>
+    </ul>
+  </div>
+
+  <!-- Q3 2025.2 -->
+  <div class="exam-box">
+    <div class="pts">Questão 3 · 3,0 pts</div>
+    <h4>Persistência com localStorage</h4>
+    <p>Utilizando o mesmo Gerenciador de Tarefas, implemente uma versão com <strong>localStorage</strong> para persistência dos dados. A aplicação deve atender a:</p>
+    <ul style="margin:8px 0 12px 20px;font-size:14px;line-height:2;">
+      <li>Ao adicionar uma tarefa, ela deve ser salva no localStorage</li>
+      <li>Ao editar uma tarefa, as alterações devem ser refletidas no localStorage</li>
+      <li>Ao excluir uma tarefa, o localStorage deve ser atualizado</li>
+      <li>Ao recarregar a página, a lista de tarefas deve ser exibida automaticamente, recuperando os dados do localStorage</li>
+    </ul>
+  </div>
+
+  <!-- ── GABARITO 2025.2 ── -->
+  <h3 style="margin-top:36px;color:var(--green);">✅ Gabarito 2025.2 — Padrão completo (4 arquivos)</h3>
+
+  <h3>index.html</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>index.html</span>
+    </div>
+    <pre><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="attr">lang</span>=<span class="str">"pt-BR"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="attr">charset</span>=<span class="str">"UTF-8"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;title&gt;</span>Gerenciador de Tarefas<span class="tag">&lt;/title&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Gerenciador de Tarefas<span class="tag">&lt;/h1&gt;</span>
+
+  <span class="tag">&lt;input</span> <span class="attr">type</span>=<span class="str">"text"</span> <span class="attr">id</span>=<span class="str">"inputTarefa"</span> <span class="attr">placeholder</span>=<span class="str">"Digite a tarefa"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">id</span>=<span class="str">"btnAdicionar"</span><span class="tag">&gt;</span>Adicionar<span class="tag">&lt;/button&gt;</span>
+
+  <span class="tag">&lt;ul</span> <span class="attr">id</span>=<span class="str">"listaTarefas"</span><span class="tag">&gt;&lt;/ul&gt;</span>
+
+  <span class="cm">&lt;!-- type="module" é OBRIGATÓRIO para usar import/export --&gt;</span>
+  <span class="tag">&lt;script</span> <span class="attr">type</span>=<span class="str">"module"</span> <span class="attr">src</span>=<span class="str">"js/app.js"</span><span class="tag">&gt;&lt;/script&gt;</span>
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></pre>
+  </div>
+
+  <h3>js/storage.js</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>js/storage.js — responsável APENAS pelo localStorage</span>
+    </div>
+    <pre><span class="kw">const</span> KEY = <span class="str">'tarefas-app'</span>;
+
+<span class="kw">export function</span> <span class="fn">obterTarefas</span>() {
+  <span class="kw">return</span> JSON.<span class="fn">parse</span>(localStorage.<span class="fn">getItem</span>(KEY)) || [];
+  <span class="cm">//     ↑ parse obrigatório              ↑ fallback para array vazio</span>
+}
+
+<span class="kw">export function</span> <span class="fn">salvarTarefas</span>(lista) {
+  localStorage.<span class="fn">setItem</span>(KEY, JSON.<span class="fn">stringify</span>(lista));
+  <span class="cm">//                         ↑ stringify obrigatório</span>
+}</pre>
+  </div>
+
+  <h3>js/dom.js</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>js/dom.js — criação e remoção de elementos da lista</span>
+    </div>
+    <pre><span class="kw">import</span> { obterTarefas, salvarTarefas } <span class="kw">from</span> <span class="str">'./storage.js'</span>;
+
+<span class="kw">export function</span> <span class="fn">renderizarLista</span>() {
+  <span class="kw">const</span> ul = document.<span class="fn">getElementById</span>(<span class="str">'listaTarefas'</span>);
+  ul.<span class="prop">innerHTML</span> = <span class="str">''</span>;  <span class="cm">// limpa antes de redesenhar</span>
+
+  <span class="fn">obterTarefas</span>().<span class="fn">forEach</span>((tarefa, index) =&gt; {
+    <span class="kw">const</span> li         = document.<span class="fn">createElement</span>(<span class="str">'li'</span>);
+    <span class="kw">const</span> span       = document.<span class="fn">createElement</span>(<span class="str">'span'</span>);
+    <span class="kw">const</span> btnEditar  = document.<span class="fn">createElement</span>(<span class="str">'button'</span>);
+    <span class="kw">const</span> btnExcluir = document.<span class="fn">createElement</span>(<span class="str">'button'</span>);
+
+    span.<span class="prop">textContent</span>      = tarefa;
+    btnEditar.<span class="prop">textContent</span>  = <span class="str">'Editar'</span>;
+    btnExcluir.<span class="prop">textContent</span> = <span class="str">'Excluir'</span>;
+
+    btnEditar.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; <span class="fn">editar</span>(index));
+    btnExcluir.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; <span class="fn">excluir</span>(index));
+
+    li.<span class="fn">append</span>(span, btnEditar, btnExcluir);
+    ul.<span class="fn">appendChild</span>(li);
+  });
+}
+
+<span class="kw">function</span> <span class="fn">editar</span>(index) {
+  <span class="kw">const</span> lista = <span class="fn">obterTarefas</span>();
+  <span class="kw">const</span> novo = prompt(<span class="str">'Editar tarefa:'</span>, lista[index]);
+  <span class="kw">if</span> (novo === <span class="kw">null</span> || !novo.<span class="fn">trim</span>()) <span class="kw">return</span>;
+  lista[index] = novo.<span class="fn">trim</span>();
+  <span class="fn">salvarTarefas</span>(lista);
+  <span class="fn">renderizarLista</span>();
+}
+
+<span class="kw">function</span> <span class="fn">excluir</span>(index) {
+  <span class="kw">const</span> lista = <span class="fn">obterTarefas</span>();
+  lista.<span class="fn">splice</span>(index, <span class="num">1</span>);  <span class="cm">// remove 1 item na posição index</span>
+  <span class="fn">salvarTarefas</span>(lista);
+  <span class="fn">renderizarLista</span>();
+}</pre>
+  </div>
+
+  <h3>js/app.js</h3>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="dots"><div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div></div>
+      <span>js/app.js — orquestrador, importa e inicializa tudo</span>
+    </div>
+    <pre><span class="kw">import</span> { obterTarefas, salvarTarefas } <span class="kw">from</span> <span class="str">'./storage.js'</span>;
+<span class="kw">import</span> { renderizarLista }             <span class="kw">from</span> <span class="str">'./dom.js'</span>;
+
+<span class="kw">const</span> input = document.<span class="fn">getElementById</span>(<span class="str">'inputTarefa'</span>);
+<span class="kw">const</span> btn   = document.<span class="fn">getElementById</span>(<span class="str">'btnAdicionar'</span>);
+
+btn.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, () =&gt; {
+  <span class="kw">const</span> texto = input.<span class="prop">value</span>.<span class="fn">trim</span>();
+  <span class="kw">if</span> (!texto) { alert(<span class="str">'Digite uma tarefa!'</span>); <span class="kw">return</span>; }
+
+  <span class="kw">const</span> lista = <span class="fn">obterTarefas</span>();
+  lista.<span class="fn">push</span>(texto);
+  <span class="fn">salvarTarefas</span>(lista);
+
+  input.<span class="prop">value</span> = <span class="str">''</span>;
+  <span class="fn">renderizarLista</span>();
+});
+
+<span class="cm">// Ao carregar a página, exibe as tarefas salvas</span>
+<span class="fn">renderizarLista</span>();</pre>
+  </div>
+
+  <div class="callout tip" style="margin-top:8px;">
+    <strong>⭐ pontos críticos 2025.2</strong>
+    Tarefas são <strong>strings simples</strong> (não objetos) · <code>JSON.parse || []</code> ao ler · <code>JSON.stringify</code> ao gravar · constante <code>KEY</code> · <code>textContent</code> (não innerHTML) para o texto · <code>splice(index, 1)</code> para excluir · <code>renderizarLista()</code> no final do app.js.
+  </div>
+
+  <!-- ── COMPARATIVO ── -->
+  <h3 style="margin-top:48px;">Comparativo entre as duas provas</h3>
+  <table>
+    <tr><th></th><th>2024.2 — Leituras</th><th>2025.2 — Tarefas</th></tr>
+    <tr><td><strong>Q1 (pts)</strong></td><td>4,0</td><td>5,0</td></tr>
+    <tr><td><strong>Q2 (pts)</strong></td><td>2,0</td><td>2,0</td></tr>
+    <tr><td><strong>Q3 (pts)</strong></td><td>4,0</td><td>3,0</td></tr>
+    <tr><td><strong>Dados por item</strong></td><td>Objeto com 4 campos (título, autor, data, status)</td><td>String simples (descrição da tarefa)</td></tr>
+    <tr><td><strong>Input do form</strong></td><td>4 campos + select de status</td><td>1 campo de texto</td></tr>
+    <tr><td><strong>Edição</strong></td><td>prompt() para cada campo separado</td><td>prompt() único</td></tr>
+    <tr><td><strong>Módulo de dados</strong></td><td>storage.js usa <code>leituras-app</code></td><td>storage.js usa <code>tarefas-app</code></td></tr>
+    <tr><td><strong>Padrão localStorage</strong></td><td colspan="2" style="text-align:center;">Idêntico nas duas — <code>JSON.parse/stringify</code> + constante KEY</td></tr>
+  </table>
+
+  <!-- ── CHECKLIST ── -->
+  <h3 style="margin-top:36px;">Checklist antes de entregar</h3>
+  <div class="quiz">
+    <h4>✅ Marque cada item antes de enviar</h4>
+    <ol>
+      <li>O HTML tem <code>&lt;script type="module" src="js/app.js"&gt;</code>?</li>
+      <li>Os imports usam <code>./</code> e terminam em <code>.js</code>?</li>
+      <li>Todo <code>getItem</code> usa <code>JSON.parse()</code> e <code>|| []</code>?</li>
+      <li>Todo <code>setItem</code> usa <code>JSON.stringify()</code>?</li>
+      <li>Após cada operação (add/edit/delete), a função de renderização é chamada?</li>
+      <li>A função de renderizar faz <code>ul.innerHTML = ''</code> antes de redesenhar?</li>
+      <li>O <code>splice(index, 1)</code> está sendo usado para excluir (não <code>delete</code>)?</li>
+      <li>A função de renderizar é chamada no final do <code>app.js</code>?</li>
+      <li>(2024.2) Cada leitura é um <strong>objeto</strong> com 4 propriedades no array?</li>
+    </ol>
+  </div>
+
+</section>
+
+</main>
+
+<footer>
+  Revisão preparada para a 2ª A.P. de Autoração Multimídia II · UFC Virtual · Prof. Henrique Pequeno
+</footer>
+
+</body>
+</html>
 
