@@ -265,6 +265,10 @@
       border-top: 1px solid var(--border);
     }
 
-inframe{
+iframe{
       border-radius: 20px;
+}
+
+.iframe-container{
+      
 }
